@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Agnets & Docs
+.env.example
+BACKEND_ROADMAP.md
+BACKEND_TODO.md
+CLAUDE.md
+AGENTS.md
+Silkroad_Analysis.md

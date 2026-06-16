@@ -1,0 +1,430 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Core user identity — extended with Silkroad-specific fields.
+/// Auth.js requires: id, name, email, emailVerified, image.
+/// Additional fields (role, passwordHash, phone, etc.) are our own additions.
+model User {
+  id               String           @id @default(cuid())
+  name             String?
+  email            String           @unique
+  emailVerified    DateTime?
+  image            String?
+  /// bcrypt hash (12 rounds). Only populated when the user signed up via
+  /// credentials (email + password). NULL for OAuth-only users.
+  passwordHash     String?
+  phone            String?
+  /// GUEST role has no DB row. USER is the default after signup.
+  /// ADMIN is granted by a SUPER_ADMIN via the protected admin API (always
+  /// together with a brandId). SUPER_ADMIN is derived from SUPER_ADMIN_EMAILS
+  /// at sign-in and mirrored here — never assigned through the UI.
+  role             Role             @default(USER)
+  /// Soft-delete / account suspension — checked on every auth callback
+  isActive         Boolean          @default(true)
+  /// Password reset (Credentials provider only)
+  resetToken       String?          @unique
+  resetTokenExpiry DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  dob              DateTime?
+  /// The brand this admin manages. NULL for customers and super-admins.
+  /// Set/cleared atomically with `role` by the super-admin assignment endpoint.
+  /// Many admins may share one brandId (a brand can have multiple staff).
+  brandId          String?
+  accounts         Account[]
+  addresses        Address[]
+  cartItems        CartItem[]
+  orders           Order[]
+  recentlyViewed   RecentlyViewed[]
+  sessions         Session[]
+  brand            Brand?           @relation("BrandAdmins", fields: [brandId], references: [id])
+  wishlistItems    WishlistItem[]
+
+  @@index([email])
+  @@index([brandId])
+  @@map("users")
+}
+
+/// OAuth provider accounts linked to a User (Google, Apple, GitHub, etc.).
+/// One User can have multiple Accounts (one per OAuth provider).
+/// Required by @auth/prisma-adapter.
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/// Server-side session managed by Auth.js.
+/// Not used with JWT strategy — this table will remain empty.
+/// Kept in schema for @auth/prisma-adapter compatibility.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// One-time tokens for email magic-link / email-provider sign-in.
+/// Required by @auth/prisma-adapter.
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+/// Saved shipping / billing address for a user.
+/// Orders snapshot the address fields at purchase time (see Order model).
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  fullName  String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  postcode  String
+  country   String
+  phone     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+/// Luxury fashion house / designer label.
+model Brand {
+  id             String    @id @default(cuid())
+  name           String    @unique
+  slug           String    @unique
+  tagline        String?
+  logoUrl        String?
+  website        String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  contactEmail   String?
+  allowReviews   Boolean   @default(false)
+  showNewBadge   Boolean   @default(true)
+  showOutOfStock Boolean   @default(true)
+  showSaleBadge  Boolean   @default(true)
+  products       Product[]
+  admins         User[]    @relation("BrandAdmins")
+
+  @@index([slug])
+  @@map("brands")
+}
+
+/// Taxonomy node — top-level (women / men / bags) and subcategories
+/// (Dresses, Suits, Totes …). Self-referencing for a tree structure.
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  gender    Gender?
+  /// Parent category; null = top-level
+  parentId  String?
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@map("categories")
+}
+
+/// A sellable product (one style, potentially multiple sizes / colours).
+model Product {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  name           String
+  description    String
+  brandId        String
+  categoryId     String
+  /// Denormalised subcategory label for quick filtering, e.g. "Dresses", "Suits"
+  subcategory    String?
+  /// Base price in USD cents (e.g. 49900 = $499.00).
+  /// Storing as Int avoids floating-point precision issues.
+  price          Int
+  salePrice      Int?
+  /// Primary / hero image URL
+  imageSrc       String
+  /// Additional gallery images (array of URL strings)
+  images         String[]
+  /// Available colours as JSON: [{ name: "Noir", hex: "#1a1a1a" }, …]
+  colors         Json             @default("[]")
+  /// Searchable tags, e.g. ["silk", "maxi", "dress"]
+  tags           String[]
+  isNew          Boolean          @default(false)
+  isSale         Boolean          @default(false)
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  brand          Brand            @relation(fields: [brandId], references: [id])
+  category       Category         @relation(fields: [categoryId], references: [id])
+  recentlyViewed RecentlyViewed[]
+  variants       Variant[]
+  wishlistItems  WishlistItem[]
+
+  @@index([slug])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([isNew])
+  @@index([isSale])
+  @@map("products")
+}
+
+/// A specific purchasable unit of a Product — one row per (product, size).
+/// The stock field is atomically decremented inside a Prisma transaction
+/// on order fulfilment (prevents over-selling).
+model Variant {
+  id            String      @id @default(cuid())
+  productId     String
+  size          String
+  stock         Int         @default(0)
+  /// Optional per-variant price override (e.g. larger sizes cost more)
+  priceOverride Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, size])
+  @@index([productId])
+  @@map("variants")
+}
+
+/// Server-side persistent cart per authenticated user.
+/// Guests use the client-side Zustand store; items are merged on login.
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String
+  size      String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  variant   Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, size])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist_items")
+}
+
+/// Tracks the last N products each user viewed (max 20, pruned in app logic).
+model RecentlyViewed {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  viewedAt  DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId, viewedAt(sort: Desc)])
+  @@map("recently_viewed")
+}
+
+/// A customer purchase. All monetary values are in USD cents (Int).
+/// CRITICAL: Prices are always computed server-side from the DB —
+/// never trust amounts sent from the client payload.
+model Order {
+  id                    String         @id @default(cuid())
+  userId                String
+  status                OrderStatus    @default(PENDING)
+  subtotal              Int
+  shippingCost          Int            @default(0)
+  discount              Int            @default(0)
+  total                 Int
+  shippingMethod        ShippingMethod @default(STANDARD)
+  /// Snapshot of the delivery address at purchase time.
+  /// NOT a foreign key — changing the address book later won't alter history.
+  shippingFullName      String
+  shippingLine1         String
+  shippingLine2         String?
+  shippingCity          String
+  shippingState         String
+  shippingPostcode      String
+  shippingCountry       String
+  shippingPhone         String?
+  /// PaymentIntent ID — used to match incoming Stripe webhooks
+  stripePaymentIntentId String?        @unique
+  /// Charge ID — populated after payment_intent.succeeded webhook fires
+  stripeChargeId        String?        @unique
+  trackingNumber        String?
+  trackingCarrier       String?
+  shippedAt             DateTime?
+  deliveredAt           DateTime?
+  customerNote          String?
+  adminNote             String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  items                 OrderItem[]
+  user                  User           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+  @@index([createdAt(sort: Desc)])
+  @@map("orders")
+}
+
+/// Individual line item within an order.
+/// Product details are snapshotted so historical orders remain accurate
+/// even if a product is later edited, repriced, or deleted.
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  productId    String
+  variantId    String
+  productName  String
+  productImage String
+  brandName    String
+  size         String
+  quantity     Int
+  unitPrice    Int
+  createdAt    DateTime @default(now())
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id])
+  variant      Variant  @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+/// Discount code that can be applied at checkout.
+model Coupon {
+  id            String     @id @default(cuid())
+  code          String     @unique
+  description   String?
+  discountType  CouponType
+  /// FLAT: amount in cents. PERCENTAGE: value in basis points (20% = 2000 bp).
+  discountValue Int
+  minOrderValue Int?
+  maxUses       Int?
+  usedCount     Int        @default(0)
+  isActive      Boolean    @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([code])
+  @@map("coupons")
+}
+
+/// Immutable audit trail for admin actions (product edits, order status
+/// changes, inventory updates, etc.).
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+/// Four-tier role system:
+/// GUEST       — unauthenticated visitor (no DB row; enforced at middleware level)
+/// USER        — authenticated customer, default after signup
+/// ADMIN       — brand administrator, scoped to a single Brand (via User.brandId)
+/// SUPER_ADMIN — platform owner. NOT assigned in the DB UI — derived from the
+/// SUPER_ADMIN_EMAILS env var on every sign-in (env is the source
+/// of truth). Can promote/demote brand admins and manage all brands.
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+/// Lifecycle of a customer order
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+/// Shipping speed selected at checkout
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+  OVERNIGHT
+}
+
+/// Top-level product gender scope (matches the frontend shop tabs)
+enum Gender {
+  WOMEN
+  MEN
+  UNISEX
+}
+
+enum CouponType {
+  FLAT
+  PERCENTAGE
+}

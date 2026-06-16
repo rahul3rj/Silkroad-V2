@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+/* Hide scrollbar for all browsers */
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Premium Awwwards-style continuous sliding underline */
+.awwwards-underline {
+  position: relative;
+}
+.awwwards-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.group:hover .awwwards-underline::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Lenis smooth scrolling recommended base styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Premium Awwwards-style Pill Button with Fading Bottom Border */
+.premium-pill-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  background: 
+    linear-gradient(white, white) padding-box,
+    linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0) 90%) border-box;
+  color: black;
+  font-family: var(--font-metropolis-light);
+  font-size: 15px;
+  font-weight: 100;
+  letter-spacing: -0.01em;
+  padding: 16px 84px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}
+
+.premium-pill-btn:hover {
+  background: 
+    linear-gradient(white, white) padding-box,
+    linear-gradient(#000000, #000000) border-box;
+  transform: translateY(-2.5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+}
+
+/* hide-scrollbar utility for horizontal scroll rows */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Price range slider thumb styles */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #000;
+  cursor: pointer;
+  margin-top: -6px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #000;
+  cursor: pointer;
+  border: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: rgba(0,0,0,0.15);
+}
+input[type="range"]::-moz-range-track {
+  height: 1px;
+  background: rgba(0,0,0,0.15);
+}
+
+/* ── Brands marquee strip ── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Premium fade in animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-down {
+  animation: fadeInDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Search transition animations ── */
+@keyframes searchContentExit {
+  0%   { opacity: 1; transform: translateY(0px); }
+  100% { opacity: 0; transform: translateY(18px); }
+}
+.search-content-exit {
+  animation: searchContentExit 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes searchContentEnter {
+  0%   { opacity: 0; transform: translateY(22px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+.search-content-enter {
+  animation: searchContentEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes searchLoaderEnter {
+  0%   { opacity: 0; transform: scale(0.88); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.search-loader-enter {
+  animation: searchLoaderEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes searchLoaderExit {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.88); }
+}
+.search-loader-exit {
+  animation: searchLoaderExit 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ── Page (collection) loader ── */
+@keyframes pageLoaderEnter {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+.page-loader-enter {
+  animation: pageLoaderEnter 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageContentEnter {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.page-content-enter {
+  animation: pageContentEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
