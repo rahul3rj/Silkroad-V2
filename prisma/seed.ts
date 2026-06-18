@@ -11,7 +11,7 @@
 // Prices in the mock data are whole dollars; we store cents (×100).
 
 import { PrismaPg } from "@prisma/adapter-pg";
-import PrismaClient from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 // ── Inline seed data (no longer depends on src/lib/data.ts) ──────────────────
 
