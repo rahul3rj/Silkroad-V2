@@ -26,6 +26,7 @@ import AppleProvider from "next-auth/providers/apple";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { LoginSchema } from "@/lib/validations/auth";
+import { authConfig } from "@/lib/auth.config";
 
 // ─── Super-admin allowlist (env is the source of truth) ──────────────────────
 // SUPER_ADMIN_EMAILS is a comma-separated list, e.g.
@@ -45,22 +46,13 @@ function isSuperAdminEmail(email?: string | null): boolean {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
 
   // ─── Session ───────────────────────────────────────────────────────────────
   // "jwt" is REQUIRED for Credentials provider. The Credentials provider cannot
   // create database sessions — using "database" here means useSession() always
   // returns unauthenticated after an email/password login.
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-
-  // ─── Pages ─────────────────────────────────────────────────────────────────
-  pages: {
-    signIn: "/login",
-    error: "/login", // Auth errors redirect back to login with ?error=
-  },
 
   // ─── Providers ─────────────────────────────────────────────────────────────
   providers: [

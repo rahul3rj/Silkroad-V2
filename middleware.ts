@@ -1,19 +1,23 @@
 // middleware.ts  (project root — next to package.json)
 // Route protection using Auth.js v5 middleware.
 //
+// IMPORTANT: imports from auth.config.ts (Edge-safe), NOT from auth.ts.
+// auth.ts uses Prisma + bcrypt which are Node.js-only and crash the Edge runtime.
+// auth.config.ts has no such dependencies — it only reads the JWT cookie.
+//
 // Route rules:
 //   /admin/*         → ADMIN role required   (USER → redirect to /)
 //   /account/*       → any authenticated user (GUEST → redirect to /login)
 //   /checkout/*      → any authenticated user (GUEST → redirect to /login)
 //   /profile/*       → any authenticated user (GUEST → redirect to /login)
 //   /login, /signup  → redirect to / if already signed in
-//
-// Auth.js exports `auth` as middleware — it reads the session from the
-// encrypted cookie on every request without hitting the DB.
 
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 import type { NextAuthRequest } from "next-auth";
+
+const { auth } = NextAuth(authConfig);
 
 // Routes that require any authenticated session
 const USER_ROUTES = ["/account", "/checkout", "/profile", "/orders", "/wishlist"];
@@ -45,7 +49,6 @@ export default auth((req: NextAuthRequest) => {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
     if (role !== "SUPER_ADMIN") {
-      // Brand admins are sent back to their dashboard
       return NextResponse.redirect(new URL("/admin", nextUrl));
     }
   }
@@ -56,7 +59,6 @@ export default auth((req: NextAuthRequest) => {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
     if (!isAdmin) {
-      // Authenticated but not an admin → send to home
       return NextResponse.redirect(new URL("/", nextUrl));
     }
   }
@@ -77,7 +79,7 @@ export default auth((req: NextAuthRequest) => {
 //   • Next.js internals (_next/*)
 //   • Static assets (images, fonts, etc.)
 //   • Favicon / public files
-//   • Auth.js own API routes (must NOT be intercepted — causes 404 on /api/auth/session)
+//   • Auth.js own API routes (must NOT be intercepted)
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|fonts|images|icons|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
