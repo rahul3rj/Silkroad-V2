@@ -151,6 +151,7 @@ export async function GET() {
   const productRevMap = new Map<string, { name: string; revenue: number; image: string }>();
   for (const item of orderItemsRaw) {
     const pid = item.productId;
+    if (!pid) continue; // skip items whose product was deleted
     if (!productRevMap.has(pid)) {
       const prod = products.find((p) => p.id === pid);
       productRevMap.set(pid, {
