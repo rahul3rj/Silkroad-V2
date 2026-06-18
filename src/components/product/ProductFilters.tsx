@@ -15,7 +15,7 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 
@@ -46,7 +46,7 @@ const COLOR_OPTIONS = [
 ];
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "One Size"];
-const MAX_PRICE = 2000;
+const MAX_PRICE = 50000;
 
 export function ProductFilters({
   subcategories,
@@ -200,7 +200,7 @@ export function ProductFilters({
         style={{ top: navbarVisible ? "64px" : "0px" }}
       >
         {/* Subcategory Pill Row */}
-        <div className="w-full flex items-center px-10 pt-4 pb-3 overflow-x-auto hide-scrollbar gap-0">
+        <div className="w-full flex items-center px-4 md:px-10 pt-4 pb-3 overflow-x-auto hide-scrollbar gap-0">
           {subcategories.map((cat) => (
             <button
               key={cat}
@@ -217,7 +217,7 @@ export function ProductFilters({
         </div>
 
         {/* Sort + Results + Filters row */}
-        <div className="w-full flex items-center justify-between px-10 py-3 border-t border-black/5">
+        <div className="w-full flex items-center justify-between px-4 md:px-10 py-3 border-t border-black/5">
           {/* Sort By (applied immediately, top bar) */}
           <div className="flex items-center gap-2 text-[10px] font-[metropolis] text-black tracking-[0.12em] uppercase">
             <span className="text-[#787878]">Sort By</span>
@@ -259,7 +259,7 @@ export function ProductFilters({
           {/* Results + Filters button */}
           <div className="flex items-center gap-5">
             {resultCount !== undefined && (
-              <span className="text-[10px] font-[metropolis] text-[#787878] tracking-[0.12em]">
+              <span className="hidden sm:block text-[10px] font-[metropolis] text-[#787878] tracking-[0.12em]">
                 {resultCount} results{searchLabel ? ` for ${searchLabel}` : ""}
               </span>
             )}
@@ -519,13 +519,13 @@ export function ProductFilters({
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-[metropolis] text-black tracking-wider">
-                    ${draft.priceRange[0]}
+                    ${draft.priceRange[0].toLocaleString()}
                   </span>
                   <span className="text-[10px] font-[metropolis] text-black tracking-wider">
                     $
                     {draft.priceRange[1] === MAX_PRICE
-                      ? `${MAX_PRICE}+`
-                      : draft.priceRange[1]}
+                      ? `${MAX_PRICE.toLocaleString()}+`
+                      : draft.priceRange[1].toLocaleString()}
                   </span>
                 </div>
                 <div className="space-y-3">
@@ -533,7 +533,7 @@ export function ProductFilters({
                     type="range"
                     min={0}
                     max={MAX_PRICE}
-                    step={50}
+                    step={500}
                     value={draft.priceRange[0]}
                     onChange={(e) => {
                       const val = Number(e.target.value);
@@ -549,7 +549,7 @@ export function ProductFilters({
                     type="range"
                     min={0}
                     max={MAX_PRICE}
-                    step={50}
+                    step={500}
                     value={draft.priceRange[1]}
                     onChange={(e) => {
                       const val = Number(e.target.value);

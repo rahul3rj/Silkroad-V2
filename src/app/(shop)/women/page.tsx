@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ProductFilters, FilterState } from "@/components/product/ProductFilters";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { PageLoader } from "@/components/product/PageLoader";
@@ -11,13 +11,22 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 
+const INITIAL_COUNT = 8;
+const LOAD_MORE_COUNT = 16;
+
 export default function WomenPage() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const { products, loading } = useProducts("category=women");
+
+  const handleFiltersChange = useCallback((f: FilterState) => {
+    setFilters(f);
+    setVisibleCount(INITIAL_COUNT);
+  }, []);
 
   if (loading) return <PageLoader />;
 
@@ -33,17 +42,18 @@ export default function WomenPage() {
       {/* Sticky Filter Bar + Drawer */}
       <ProductFilters
         subcategories={womenSubcategories}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         resultCount={products.length}
         searchLabel="Women"
       />
 
       {/* Flat 4-col Product Grid */}
-      <div className="w-full px-10 py-14">
+      <div className="w-full px-4 md:px-10 py-8 md:py-14">
         <ProductGrid
           products={products}
           filters={filters}
-          showMoreHref="/women/all"
+          visibleCount={visibleCount}
+          onShowMore={() => setVisibleCount((c) => c + LOAD_MORE_COUNT)}
         />
       </div>
     </section>

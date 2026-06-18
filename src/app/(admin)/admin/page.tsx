@@ -80,7 +80,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <section className="min-h-screen bg-white pt-12 pb-24">
+    <section className="min-h-screen bg-white pt-6.5 pb-24">
 
       {/* ── Breadcrumb ── */}
       <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">

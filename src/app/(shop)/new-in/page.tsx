@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ProductFilters, FilterState } from "@/components/product/ProductFilters";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { PageLoader } from "@/components/product/PageLoader";
@@ -12,11 +12,11 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 
-// New-in subcategory filter handles both category ("Women","Men","Bags")
+// New-in subcategory filter handles both category ("Women","Men","Accessories")
 // and subcategory (e.g. "Dresses", "Suits") pills
 function applyNewInSubcat(source: ProductData[], filters: FilterState) {
   const cats = filters.subcategories;
@@ -25,7 +25,7 @@ function applyNewInSubcat(source: ProductData[], filters: FilterState) {
   const categoryMap: Record<string, string> = {
     Women: "women",
     Men: "men",
-    Bags: "bags",
+    Accessories: "bags",
   };
 
   return source.filter((p) => {
@@ -36,13 +36,22 @@ function applyNewInSubcat(source: ProductData[], filters: FilterState) {
   });
 }
 
+const INITIAL_COUNT = 8;
+const LOAD_MORE_COUNT = 16;
+
 export default function NewInPage() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const { products: newInProducts, loading } = useProducts("isNew=true");
+
+  const handleFiltersChange = useCallback((f: FilterState) => {
+    setFilters(f);
+    setVisibleCount(INITIAL_COUNT);
+  }, []);
 
   // Apply the New In-specific category pill filter in the page.
   // We then pass `gridFilters` to ProductGrid with subcategories cleared
-  // so the grid doesn't try to match category labels ("Women", "Men", "Bags")
+  // so the grid doesn't try to match category labels ("Women", "Men", "Accessories")
   // against product.subcategory ("Dresses", "Suits", …) and zero everything out.
   const products = useMemo(
     () => applyNewInSubcat(newInProducts, filters),
@@ -68,14 +77,19 @@ export default function NewInPage() {
       {/* Sticky Filter Bar + Drawer */}
       <ProductFilters
         subcategories={newInSubcategories}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         resultCount={products.length}
         searchLabel="New Arrivals"
       />
 
       {/* Flat 4-col Product Grid */}
-      <div className="w-full px-10 py-14">
-        <ProductGrid products={products} filters={gridFilters} />
+      <div className="w-full px-4 md:px-10 py-8 md:py-14">
+        <ProductGrid
+          products={products}
+          filters={gridFilters}
+          visibleCount={visibleCount}
+          onShowMore={() => setVisibleCount((c) => c + LOAD_MORE_COUNT)}
+        />
       </div>
     </section>
   );

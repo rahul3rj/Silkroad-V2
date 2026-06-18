@@ -12,7 +12,7 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 

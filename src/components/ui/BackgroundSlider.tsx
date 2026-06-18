@@ -119,6 +119,8 @@ export function BackgroundSlider() {
         }
         .grid-trail-cell {
           background-color: #ffffff;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+          background-size: 80px 80px;
           mix-blend-mode: difference;
           opacity: 0;
           transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -154,10 +156,10 @@ export function BackgroundSlider() {
             {/* Subtle premium dark vignette overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/25" />
 
-            {/* Awwwards-style interactive grid trail */}
+            {/* Interactive grid trail — desktop only (performance) */}
             {isActive && (
               <div
-                className="absolute inset-0 grid pointer-events-auto select-none overflow-hidden"
+                className="absolute inset-0 pointer-events-auto select-none overflow-hidden hidden md:grid"
                 style={{
                   gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
                   gridTemplateRows: `repeat(${GRID_ROWS}, minmax(0, 1fr))`,

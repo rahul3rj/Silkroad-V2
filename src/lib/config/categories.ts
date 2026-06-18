@@ -41,7 +41,7 @@ export const newInSubcategories = [
   "View All",
   "Women",
   "Men",
-  "Bags",
+  "Accessories",
   "Dresses",
   "Co-Ords",
   "Suits",

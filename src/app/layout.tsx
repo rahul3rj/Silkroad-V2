@@ -54,6 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${orion.variable} ${royal.variable} ${metropolis.variable} ${metropolisSemiBold.variable} ${metropolisLight.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

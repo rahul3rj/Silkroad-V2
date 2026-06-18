@@ -120,56 +120,67 @@ export default function AdminSidebar({ brandName, brandSlug, role = "ADMIN", use
 
   return (
     <aside className="w-full md:w-64 shrink-0">
-      <div className="border border-black/8">
-        {/* Brand header */}
-        <div className="px-8 py-8 border-b border-black/8 flex flex-col items-center text-center gap-3">
-          <div className="w-14 h-14 border border-black/10 overflow-hidden bg-[#f5f5f5] shrink-0">
-            {userImage ? (
-              <Image
-                src={userImage}
-                alt={brandName}
-                width={56}
-                height={56}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="font-[metropolisSemiBold] text-[18px] text-black/40 uppercase">
-                  {brandName.charAt(0)}
-                </span>
-              </div>
-            )}
+      <div className="border border-black/8 flex flex-col h-screen justify-between">
+        <div>
+          {/* Silkroad Logo */}
+          <div className="h-16 flex items-center ">
+            <Link
+              href="/"
+              className="text-md tracking-widest font-[orion] text-current absolute left-10 transition-transform duration-300 hover:scale-105"
+            >
+              SILKROAD<sup className="text-[10px] relative -top-2">®</sup>
+            </Link>
           </div>
-          <div>
-            <p className="font-[metropolisSemiBold] text-[10px] tracking-[0.18em] uppercase text-black">
-              {brandName}
-            </p>
-            <p className="font-[metropolis] text-[10px] text-[#787878] tracking-wider mt-0.5">
-              {isSuperAdmin ? "Platform Admin" : "Brand Portal"}
-            </p>
+          {/* Brand header */}
+          <div className="px-8 py-8 border-b border-t border-black/8 flex flex-col items-center text-center gap-3">
+            <div className="w-14 h-14 border border-black/10 overflow-hidden bg-[#f5f5f5] shrink-0">
+              {userImage ? (
+                <Image
+                  src={userImage}
+                  alt={brandName}
+                  width={56}
+                  height={56}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="font-[metropolisSemiBold] text-[18px] text-black/40 uppercase">
+                    {brandName.charAt(0)}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="font-[metropolisSemiBold] text-[10px] tracking-[0.18em] uppercase text-black">
+                {brandName}
+              </p>
+              <p className="font-[metropolis] text-[10px] text-[#787878] tracking-wider mt-0.5">
+                {isSuperAdmin ? "Platform Admin" : "Brand Portal"}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Nav items */}
-        <nav className="py-2">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-4 px-8 py-4 font-[metropolis] text-[11px] tracking-[0.12em] uppercase transition-all duration-200 border-l-2 ${
-                  active
-                    ? "border-black text-black bg-black/[0.02]"
-                    : "border-transparent text-[#787878] hover:text-black hover:bg-black/[0.015]"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* Nav items */}
+          <nav className="py-2">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-4 px-8 py-4 font-[metropolis] text-[11px] tracking-[0.12em] uppercase transition-all duration-200 border-l-2 ${
+                    active
+                      ? "border-black text-black bg-black/[0.02]"
+                      : "border-transparent text-[#787878] hover:text-black hover:bg-black/[0.015]"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
         {/* Bottom links */}
         <div className="px-8 py-5 border-t border-black/8 space-y-3">

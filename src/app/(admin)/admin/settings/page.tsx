@@ -42,6 +42,13 @@ type SettingsPayload =
   | { role: "SUPER_ADMIN"; admin: AdminUser; platform: PlatformStats; brand?: undefined }
   | { role: "ADMIN" | "SUPER_ADMIN"; brand: BrandSettings; admin: AdminUser; platform?: undefined };
 
+// ─── Skeleton placeholder ──────────────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+  return (
+    <div className={`bg-black/[0.04] animate-pulse rounded-sm ${className ?? ""}`} />
+  );
+}
+
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({
   value, onChange, label, description, disabled,
@@ -95,7 +102,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function SuperAdminSettings({ admin, platform }: { admin: AdminUser; platform: PlatformStats }) {
   return (
-    <section className="min-h-screen bg-white pt-12 pb-24">
+    <section className="min-h-screen bg-white pt-6.5 pb-24">
       {/* Breadcrumb */}
       <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
         <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878]">Platform</span>
@@ -103,7 +110,7 @@ function SuperAdminSettings({ admin, platform }: { admin: AdminUser; platform: P
         <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-black">Settings</span>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-10 pt-10">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 pt-10">
         <div className="mb-10">
           <h1 className="font-[metropolis] text-[28px] tracking-[-0.01em] text-black">Settings</h1>
           <p className="font-[metropolis] text-[11px] text-[#787878] tracking-wider mt-1">
@@ -287,7 +294,7 @@ function BrandAdminSettings({
   const productCount = brand._count.products;
 
   return (
-    <section className="min-h-screen bg-white pt-12 pb-24">
+    <section className="min-h-screen bg-white pt-6.5 pb-24">
       {/* Breadcrumb */}
       <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
         <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878]">{brand.name}</span>
@@ -295,7 +302,7 @@ function BrandAdminSettings({
         <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-black">Settings</span>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 md:px-10 pt-10">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 pt-10">
         {/* Title */}
         <div className="flex items-baseline justify-between mb-10">
           <div>
@@ -490,18 +497,32 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <section className="min-h-screen bg-white pt-12 pb-24">
-        <div className="border-b border-black/8 px-10 py-3">
-          <div className="h-3 w-40 bg-black/5 animate-pulse" />
+      <section className="min-h-screen bg-white pt-6.5 pb-24">
+        {/* Breadcrumb */}
+        <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
+          <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878]">Admin</span>
+          <span className="font-[metropolis] text-[10px] text-[#bbb]">/</span>
+          <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-black">Settings</span>
         </div>
-        <div className="max-w-3xl mx-auto px-6 md:px-10 pt-10 space-y-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border border-black/8 p-7 space-y-4">
-              <div className="h-3 w-32 bg-black/5 animate-pulse" />
-              <div className="h-10 bg-black/5 animate-pulse" />
-              <div className="h-10 bg-black/5 animate-pulse" />
+
+        <div className="max-w-6xl mx-auto px-6 md:px-10 pt-10">
+          {/* Title */}
+          <div className="flex items-baseline justify-between mb-10">
+            <div>
+              <h1 className="font-[metropolis] text-[28px] tracking-[-0.01em] text-black">Settings</h1>
+              <p className="font-[metropolis] text-[11px] text-[#787878] tracking-wider mt-1">Loading…</p>
             </div>
-          ))}
+          </div>
+
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-black/8 p-7 space-y-4">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );

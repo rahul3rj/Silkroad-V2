@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { BackgroundSlider } from "@/components/ui/BackgroundSlider";
@@ -36,42 +36,30 @@ function CreationCard({
       const viewportHeight = window.innerHeight;
       const cardHeight = rect.height;
 
-      // Calculate how much of the card has entered the viewport from the bottom
       const visibleHeight = viewportHeight - rect.top;
 
-      // Thresholds: Starts appearing at 25% in, fully sharp and aligned at 50% in
       const startThreshold = cardHeight * 0.25;
       const endThreshold = cardHeight * 0.5;
 
       if (visibleHeight < startThreshold) {
-        // Below 25%: hidden, blurry, and translated down
         text.style.opacity = "0";
         text.style.filter = "blur(16px)";
         text.style.transform = "translateY(40px)";
       } else if (visibleHeight >= endThreshold) {
-        // Above 50%: fully visible, sharp, and transform cleared for perfect sticky behavior
         text.style.opacity = "1";
         text.style.filter = "blur(0px)";
         text.style.transform = "none";
       } else {
-        // Between 25% and 50%: smoothly interpolate progress
         const progress =
           (visibleHeight - startThreshold) / (endThreshold - startThreshold);
-
-        const opacity = progress;
-        const blur = (1 - progress) * 16;
-        const translateY = (1 - progress) * 40;
-
-        text.style.opacity = `${opacity}`;
-        text.style.filter = `blur(${blur}px)`;
-        text.style.transform = `translateY(${translateY}px)`;
+        text.style.opacity = `${progress}`;
+        text.style.filter = `blur(${(1 - progress) * 16}px)`;
+        text.style.transform = `translateY(${(1 - progress) * 40}px)`;
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
-
-    // Initial call to set correct positions
     handleScroll();
 
     return () => {
@@ -84,40 +72,34 @@ function CreationCard({
     <Link
       ref={cardRef}
       href={href}
-      className="h-full w-[32.5%] relative group cursor-pointer block"
+      /* Mobile: full-width tall card. Desktop: 32.5% wide side-by-side */
+      className="w-full h-[55vw] md:h-full md:w-[32.5%] relative group cursor-pointer block flex-shrink-0"
     >
-      {/* Image container with overflow-hidden for scaling clip */}
+      {/* Image container */}
       <div className="absolute inset-0 overflow-hidden">
         <img
           className="h-full w-full object-cover transition-transform duration-[1800ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
           src={imageSrc}
           alt={title}
         />
-        {/* Subtle overlay to enhance contrast */}
         <div className="absolute inset-0 bg-black/[0.02] group-hover:bg-black/[0.07] transition-colors duration-[1200ms] z-10" />
       </div>
 
-      {/* Sticky Text Overlay Container */}
+      {/* Text overlay */}
       <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end mix-blend-difference text-white">
-        {/* Pinned sticky element */}
         <div
           ref={textRef}
-          className="sticky bottom-16 flex flex-col items-center text-center w-full pb-10"
+          className="sticky bottom-16 flex flex-col items-center text-center w-full pb-8 md:pb-10"
           style={{ willChange: "transform, opacity, filter" }}
         >
-          {/* Subtitle: 'Women' in cursive royal font */}
-          <span className="font-[royal] text-2xl md:text-3xl tracking-wide opacity-90 transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+          <span className="font-[royal] text-xl md:text-3xl tracking-wide opacity-90 transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
             {subtitle}
           </span>
-
-          {/* Title: 'Silkroad Resort Collection' */}
-          <h3 className="font-[metropolis] text-xl md:text-2xl tracking-wide leading-tight mt-1 mb-4 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] origin-center">
+          <h3 className="font-[metropolis] text-base md:text-2xl tracking-wide leading-tight mt-1 mb-3 md:mb-4 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] origin-center">
             {title}
           </h3>
-
-          {/* CTA: 'Discover more' with sliding underline */}
           <div className="flex items-center mt-1 pointer-events-auto">
-            <span className="font-[metropolisSemiBold] text-[11px] md:text-xs tracking-[0.15em] text-white awwwards-underline transition-all duration-500 group-hover:tracking-[0.2em]">
+            <span className="font-[metropolisSemiBold] text-[10px] md:text-xs tracking-[0.15em] text-white awwwards-underline transition-all duration-500 group-hover:tracking-[0.2em]">
               Discover more
             </span>
           </div>
@@ -127,15 +109,11 @@ function CreationCard({
   );
 }
 
-// ProductCard is now imported from @/components/product/ProductCard
-
 export default function Home() {
-  const videoSectionRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
 
-  // 8 random products fetched from the DB — reshuffled on each page load
   const [featuredProducts, setFeaturedProducts] = useState<ProductData[]>([]);
   useEffect(() => {
     fetch("/api/products?random=true&limit=8")
@@ -150,7 +128,6 @@ export default function Home() {
   const handleVideoClick = () => {
     const video = videoRef.current;
     if (!video) return;
-
     if (video.paused) {
       video.play().catch((err) => console.log(err));
       setIsPlaying(true);
@@ -160,73 +137,70 @@ export default function Home() {
     }
   };
 
+  // Custom cursor — desktop only (skip on touch devices)
   useEffect(() => {
-    const container = videoSectionRef.current;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
     const cursor = cursorRef.current;
-    if (!container || !cursor) return;
+    if (!cursor) return;
 
     const mouse = { x: 0, y: 0 };
     const pos = { x: 0, y: 0 };
     let active = false;
-
-    // Direct physics tracking for angle and velocity smoothing
+    let hoveredTarget: HTMLElement | null = null;
     let currentAngle = 0;
     let currentSpeed = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      const target = (e.target as HTMLElement).closest("[data-custom-cursor]") as HTMLElement | null;
+      hoveredTarget = target;
     };
+    const handleMouseLeave = () => { hoveredTarget = null; };
 
-    const handleMouseEnter = () => {
-      active = true;
-      cursor.style.opacity = "1";
-    };
-
-    const handleMouseLeave = () => {
-      active = false;
-      cursor.style.opacity = "0";
-    };
-
-    container.addEventListener("mousemove", handleMouseMove, { passive: true });
-    container.addEventListener("mouseenter", handleMouseEnter, {
-      passive: true,
-    });
-    container.addEventListener("mouseleave", handleMouseLeave, {
-      passive: true,
-    });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave, { passive: true });
 
     let animationId: number;
-
     const updateCursor = () => {
+      if (hoveredTarget) {
+        const text = hoveredTarget.getAttribute("data-custom-cursor") || "";
+        const textSpan = cursor.querySelector(".cursor-text");
+        if (textSpan && textSpan.textContent !== text) textSpan.textContent = text;
+        if (!active) {
+          active = true;
+          pos.x = mouse.x;
+          pos.y = mouse.y;
+          cursor.style.opacity = "1";
+          cursor.style.scale = "1";
+        }
+      } else {
+        if (active) {
+          active = false;
+          cursor.style.opacity = "0";
+          cursor.style.scale = "0";
+        }
+      }
+
       if (active) {
-        const lerpFactor = 0.08; // smooth inertia heavy cursor
+        const lerpFactor = 0.08;
         const dx = mouse.x - pos.x;
         const dy = mouse.y - pos.y;
-
         pos.x += dx * lerpFactor;
         pos.y += dy * lerpFactor;
-
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // 1. Stabilize and interpolate the rotation angle (prevents sub-pixel quadrant jumping)
         if (dist > 1.5) {
           const targetAngle = Math.atan2(dy, dx);
-
-          // Keep rotation smooth around the -PI / PI loop boundary (shortest path angle lerp)
           let angleDiff = targetAngle - currentAngle;
           while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
           while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-
-          currentAngle += angleDiff * 0.12; // slow rot lerp removes all jitter
+          currentAngle += angleDiff * 0.12;
         }
 
-        // 2. Interpolate the speed/stretching factor (delays distortion until direction is established)
         const targetSpeed = Math.min(dist * 0.005, 0.35);
-        currentSpeed += (targetSpeed - currentSpeed) * 0.08; // inertia delay on the squishy blob deformation
-
-        // 3. Compute volume-preserved scale matrix
+        currentSpeed += (targetSpeed - currentSpeed) * 0.08;
         const scaleX = 1 + currentSpeed;
         const scaleY = 1 - currentSpeed * 0.85;
 
@@ -234,20 +208,16 @@ export default function Home() {
         cursor.style.top = `${pos.y}px`;
 
         const dot = cursor.querySelector(".cursor-dot") as HTMLDivElement;
-        if (dot) {
-          dot.style.transform = `rotate(${currentAngle}rad) scale(${scaleX}, ${scaleY})`;
-        }
+        if (dot) dot.style.transform = `rotate(${currentAngle}rad) scale(${scaleX}, ${scaleY})`;
       }
 
       animationId = requestAnimationFrame(updateCursor);
     };
-
     updateCursor();
 
     return () => {
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseenter", handleMouseEnter);
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animationId);
     };
   }, []);
@@ -255,75 +225,86 @@ export default function Home() {
   return (
     <main className="min-h-screen w-full text-white flex flex-col relative">
       <Navbar />
-      {/* 1st Page: Landing Page */}
+
+      {/* ── 1st: Hero / Landing ─────────────────────────────────────────────── */}
       <div className="h-screen w-full flex justify-center items-center">
         <BackgroundSlider />
       </div>
-      {/* 2nd Page: Discover the Collection */}
-      <div className="h-[120vh] w-full bg-white flex flex-col justify-start items-center px-10">
-        <div className="h-[20vh] w-full flex justify-center items-center relative">
-          <h1 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0">
+
+      {/* ── 2nd: Discover the Collection (3 cards) ──────────────────────────── */}
+      <div className="w-full bg-white flex flex-col justify-start items-center px-4 md:px-10 py-10 md:py-0 md:h-[120vh]">
+        {/* Section header */}
+        <div className="h-auto md:h-[20vh] w-full flex justify-center items-center relative py-8 md:py-0">
+          <h2 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0">
             [ 01 ]
-          </h1>
-          <h1 className="text-black font-[metropolis] text-xl w-[25%] text-center">
+          </h2>
+          <h2 className="text-black font-[metropolis] text-lg md:text-xl w-full md:w-[25%] text-center leading-snug">
             Explore a Selection of the Maison&apos;s Creations
-          </h1>
+          </h2>
         </div>
-        <div className="h-[100vh] w-full flex justify-between items-center pb-12">
+
+        {/* Cards — vertical stack on mobile, horizontal row on desktop */}
+        <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 md:h-[100vh] md:pb-12">
           <CreationCard
             index="01"
             title="Silkroad Resort Collection"
             subtitle="Women"
-            imageSrc="images/cc1.png"
+            imageSrc="https://i.pinimg.com/1200x/86/56/7b/86567b88287510b3cba6b2e9e226e760.jpg"
             href="/women"
           />
           <CreationCard
             index="02"
             title="Silkroad Resort Collection"
-            subtitle="Women"
-            imageSrc="images/cc2.png"
+            subtitle="Men"
+            imageSrc="https://i.pinimg.com/1200x/0a/e0/d3/0ae0d3147a2eacd968f910aacd2e489f.jpg"
             href="/men"
           />
           <CreationCard
             index="03"
             title="Silkroad Resort Collection"
-            subtitle="Women"
-            imageSrc="images/cc3.png"
-            href="/bags"
+            subtitle="Accessories"
+            imageSrc="https://i.pinimg.com/1200x/12/6e/81/126e81fdc2dfcd8f63bab2fcfa2b5ad1.jpg"
+            href="/accessories"
           />
         </div>
       </div>
-      {/* 3rd Page: Men&apos;s Fashion */}
-      <div className="h-[130vh] w-full bg-white flex justify-center items-center px-10">
-        <div className="w-full h-[100vh] flex justify-between items-center">
-          <div className="w-[60%] h-full flex justify-center items-end">
-            <img
-              src="images/ds1.png"
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="w-[38%] h-full flex flex-col justify-between ">
-            {/* Top Section: Category, Price, and Color Palette Selection */}
-            <div className="w-full flex flex-col justify-start">
-              <div className="w-full flex justify-between items-center text-black font-[metropolis]">
-                <span className="text-sm font-[metropolisSemiBold] uppercase tracking-widest text-black">
-                  Men&apos;s Fashion
-                </span>
-                <span className="text-sm font-[metropolisSemiBold] tracking-widest text-black">
-                  $499
-                </span>
-              </div>
-              <div className="flex gap-3 mt-4">
-                <span className="w-3.5 h-3.5 rounded-full bg-[#8B0000] cursor-pointer hover:scale-115 transition-all duration-300 ring-offset-2 hover:ring-2 hover:ring-[#8B0000]/30 shadow-sm" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#0f766e] cursor-pointer hover:scale-115 transition-all duration-300 ring-offset-2 hover:ring-2 hover:ring-[#0f766e]/30 shadow-sm" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#1e293b] cursor-pointer hover:scale-115 transition-all duration-300 ring-offset-2 hover:ring-2 hover:ring-[#1e293b]/30 shadow-sm" />
-              </div>
-            </div>
 
-            {/* Middle Section: Cursive script label and indicator */}
+      {/* ── 3rd: Men's Fashion editorial ────────────────────────────────────── */}
+      <div className="w-full bg-white flex justify-center items-center px-4 md:px-10 py-12 md:h-[130vh]">
+        {/* Mobile: stack vertically. Desktop: side-by-side 60/38 */}
+        <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center md:h-[100vh] gap-6 md:gap-0">
+
+          {/* Big hero image */}
+          <Link
+            href="/men"
+            className="w-full md:w-[60%] h-[60vw] md:h-full flex justify-center items-end overflow-hidden md:cursor-none"
+            data-custom-cursor="VIEW"
+          >
+            <img
+              src="https://i.pinimg.com/1200x/bb/60/af/bb60af7e5818e11db98cbd4385436f8d.jpg"
+              alt="Men's Fashion"
+              className="h-full w-full object-cover hover:scale-103 transition-all duration-500"
+            />
+          </Link>
+
+          {/* Right column */}
+          <div className="w-full md:w-[38%] flex flex-col justify-between gap-4 md:gap-0 md:h-full">
+            {/* Small secondary image */}
+            <Link
+              href="/men"
+              className="w-full h-[50vw] md:h-[50vh] flex items-center overflow-hidden md:cursor-none"
+              data-custom-cursor="VIEW"
+            >
+              <img
+                src="https://i.pinimg.com/1200x/23/b8/ab/23b8ab050ead93f7e906cfa7e7064230.jpg"
+                alt="Men's Look"
+                className="h-full w-full object-cover object-[0%_15%] hover:scale-105 transition-all duration-500"
+              />
+            </Link>
+
+            {/* Label row */}
             <div className="w-full flex justify-between items-center text-black">
-              <span className="font-[royal] text-4xl md:text-5xl text-[#787878] italic tracking-wide select-none">
+              <span className="font-[royal] text-3xl md:text-5xl text-[#787878] italic tracking-wide select-none">
                 Men&apos;s Fashion
               </span>
               <span className="font-[metropolisSemiBold] text-xs text-[#787878] tracking-widest select-none">
@@ -331,9 +312,9 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Bottom Section: Editorial copywriting */}
+            {/* Copy */}
             <div className="w-full flex flex-col justify-end text-left">
-              <p className="font-[metropolis] text-[#787878] text-[13px] md:text-[14px] leading-relaxed tracking-wide select-none text-justify">
+              <p className="font-[metropolis] text-[#787878] text-[12px] md:text-[14px] leading-relaxed tracking-wide select-none text-justify">
                 Our Work Knows No Borders. We At Editors At Work Are Available
                 24/7 And Committed To Delivering High-Quality Video Content, No
                 Matter Where You Are. Whether You&apos;re In New York, Mumbai, Or
@@ -345,54 +326,45 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* 4th Page: Products */}
-      <div className="h-[210vh] w-full bg-white flex flex-col justify-between items-center px-10 pb-16 relative">
-        {/* Title Block */}
-        <div className="h-[20vh] w-full flex justify-center items-center relative">
-          <h1 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0 select-none">
+
+      {/* ── 4th: Featured Products ───────────────────────────────────────────── */}
+      <div className="w-full bg-white flex flex-col justify-between items-center px-4 md:px-10 pb-16 pt-10 md:h-[210vh] relative">
+        {/* Title */}
+        <div className="h-auto md:h-[20vh] w-full flex justify-center items-center relative py-6 md:py-0">
+          <h2 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0 select-none">
             [ 03 ]
-          </h1>
-          <h1 className="text-black font-[metropolis] text-xl text-center leading-tight select-none">
-            Explore a Selection of the Maison&apos;s
-            <br />
-            Creations
-          </h1>
+          </h2>
+          <h2 className="text-black font-[metropolis] text-lg md:text-xl text-center leading-tight select-none">
+            Best picks for you by Silkroad
+          </h2>
         </div>
 
-        {/* Product Grid Rows — 8 random products from DB */}
-        <div className="w-full flex flex-col gap-16 justify-center flex-grow">
-          {/* Row 1 */}
-          <div className="w-full grid grid-cols-4 gap-5">
+        {/* Product grid — 2 cols mobile, 4 cols desktop */}
+        <div className="w-full flex flex-col gap-8 md:gap-16 justify-center flex-grow">
+          <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {row1.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          {/* Row 2 */}
-          <div className="w-full grid grid-cols-4 gap-5">
+          <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {row2.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </div>
 
-        {/* Discover Button at the very bottom */}
-        <div className="h-[10vh] w-full flex justify-center items-center mt-8">
+        {/* Discover button */}
+        <div className="h-auto md:h-[10vh] w-full flex justify-center items-center mt-10 md:mt-8">
           <Link
             href="/new-in"
             className="premium-pill-btn group/btn relative overflow-hidden select-none text-center"
           >
-            {/* The Curtain Background Slide Up */}
             <div className="absolute inset-0 bg-black origin-bottom scale-y-0 group-hover/btn:scale-y-100 transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
-
-            {/* The Text Wrapper (mix-blend-difference inverts color to white when black curtain slides up) */}
             <div className="relative z-10 pointer-events-none mix-blend-difference text-white flex justify-center items-center overflow-hidden h-[22px]">
-              {/* Rolling text animation container */}
               <div className="relative overflow-hidden h-full flex flex-col justify-start">
-                {/* Normal Text (translates upwards) */}
                 <span className="block transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:-translate-y-full">
                   Discover the Collection
                 </span>
-                {/* Rolled Text (translates from below) */}
                 <span className="absolute left-0 top-0 block transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] translate-y-full group-hover/btn:translate-y-0">
                   Discover the Collection
                 </span>
@@ -401,12 +373,13 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      {/* 5th Page: WoMen&apos;s Fashion with Custom Water Blob Cursor */}
+
+      {/* ── 5th: Women's Fashion video ──────────────────────────────────────── */}
       <div className="h-screen w-full flex justify-center items-center">
         <div
-          ref={videoSectionRef}
           onClick={handleVideoClick}
-          className="w-full h-full flex items-center justify-center relative overflow-hidden group/video cursor-none"
+          data-custom-cursor={isPlaying ? "PAUSE" : "PLAY"}
+          className="w-full h-full flex items-center justify-center relative overflow-hidden group/video md:cursor-none cursor-pointer"
         >
           <video
             ref={videoRef}
@@ -415,79 +388,82 @@ export default function Home() {
             muted
             loop
             src="/womens.mp4"
-          ></video>
+            playsInline
+          />
 
-          {/* Custom Awwwards-style Water Blob Cursor */}
-          <div
-            ref={cursorRef}
-            className="absolute pointer-events-none z-30 opacity-0 transition-opacity duration-300 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-24 h-24 mix-blend-difference"
-            style={{ left: "-150px", top: "-150px" }}
-          >
-            {/* The Water Blob Dot (Background deforming layer) */}
-            <div className="cursor-dot absolute w-20 h-20 bg-white mix-blend-difference rounded-full transition-transform duration-100 ease-out will-change-transform" />
-
-            {/* The Play/Pause Text (Centered stable overlay inside the blob) */}
-            <span className="absolute z-40 font-[metropolisSemiBold] text-[10px] tracking-[0.2em] text-white mix-blend-difference uppercase select-none font-semibold pl-[0.2em]">
-              {isPlaying ? "PAUSE" : "PLAY"}
-            </span>
-          </div>
-
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-black/20 z-10 flex flex-col justify-between px-10 py-10 mix-blend-difference pointer-events-none">
-            <h1 className="text-white font-[metropolisSemiBold] text-xs ">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-black/20 z-10 flex flex-col justify-between px-6 md:px-10 py-10 mix-blend-difference pointer-events-none">
+            <h2 className="text-white font-[metropolisSemiBold] text-xs">
               [ 04 ]
-            </h1>
+            </h2>
             <div className="text-white text-center w-full mx-auto">
-              <h1 className="text-5xl md:text-6xl font-[royal] mb-4">
-                WoMen&apos;s Fashion
-              </h1>
-              <h1 className="text-sm font-[metropolis] leading-relaxed mx-auto opacity-90">
+              <h2 className="text-4xl md:text-6xl font-[royal] mb-3 md:mb-4">
+                Women&apos;s Fashion
+              </h2>
+              <p className="text-xs md:text-sm font-[metropolis] leading-relaxed mx-auto opacity-90 max-w-xs md:max-w-none">
                 Our work knows no borders. We at Editors At Work are available
                 24/7 and committed to delivering high-quality video content, no
-                matter where you are. Whether you’re in New York, Mumbai, or
+                matter where you are. Whether you&apos;re in New York, Mumbai, or
                 Melbourne, our team works across time zones to ensure your
                 deadlines are met and your vision comes to life without
                 compromise.
-              </h1>
+              </p>
             </div>
           </div>
         </div>
       </div>
-      {/* 6th Page: Discover more collections */}
-      <div className="h-[120vh] w-full bg-white flex flex-col justify-start items-center px-10">
-        <div className="h-[20vh] w-full flex justify-center items-center relative">
-          <h1 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0">
-            [ 01 ]
-          </h1>
-          <h1 className="text-black font-[metropolis] text-xl w-[25%] text-center">
-            Explore a Selection of the Maison&apos;s Creations
-          </h1>
+
+      {/* ── 6th: More collections (3 cards) ─────────────────────────────────── */}
+      <div className="w-full bg-white flex flex-col justify-start items-center px-4 md:px-10 py-10 md:py-0 md:h-[120vh]">
+        <div className="h-auto md:h-[20vh] w-full flex justify-center items-center relative py-8 md:py-0">
+          <h2 className="text-[#787878] font-[metropolisSemiBold] text-xs absolute left-0">
+            [ 05 ]
+          </h2>
+          <h2 className="text-black font-[metropolis] text-lg md:text-xl w-full md:w-[25%] text-center leading-snug">
+            Explore a Selection of the Silkroad&apos;s Creations
+          </h2>
         </div>
-        <div className="h-[100vh] w-full flex justify-between items-center pb-12">
+        <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 md:h-[100vh] md:pb-12">
           <CreationCard
             index="01"
-            title="Silkroad Resort Collection"
+            title="Silkroad Balenciaga Collection"
             subtitle="Women"
-            imageSrc="images/pp2.png"
+            imageSrc="https://i.pinimg.com/1200x/a7/27/8f/a7278f13e7839cd812a69a2e1cb33e74.jpg"
             href="/women"
           />
           <CreationCard
             index="02"
-            title="Silkroad Resort Collection"
-            subtitle="Women"
-            imageSrc="images/pp7.png"
+            title="Silkroad Louis Vuitton Collection"
+            subtitle="Men"
+            imageSrc="https://i.pinimg.com/1200x/85/a7/ed/85a7edfd9c2f9edd33824745ceff2e18.jpg"
             href="/men"
           />
           <CreationCard
             index="03"
-            title="Silkroad Resort Collection"
-            subtitle="Women"
-            imageSrc="images/pp3.png"
-            href="/bags"
+            title="Silkroad Saint Laurent Collection"
+            subtitle="Accessories"
+            imageSrc="https://i.pinimg.com/1200x/1c/4a/bb/1c4abbf2ddb4772d0d1266bea393a39f.jpg"
+            href="/accessories"
           />
         </div>
       </div>
-      {/* 7th page: Footer */}
+
+      {/* ── 7th: Footer ─────────────────────────────────────────────────────── */}
       <Footer />
+
+      {/* ── Custom Water Blob Cursor — hidden on touch devices ──────────────── */}
+      <div
+        ref={cursorRef}
+        className="fixed pointer-events-none z-[9999] opacity-0 scale-0 items-center justify-center w-24 h-24 mix-blend-difference hidden md:flex"
+        style={{
+          left: "-150px",
+          top: "-150px",
+          transform: "translate(-50%, -50%)",
+          transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), scale 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        <div className="cursor-dot absolute w-20 h-20 bg-white mix-blend-difference rounded-full transition-transform duration-100 ease-out will-change-transform" />
+        <span className="cursor-text absolute z-40 font-[metropolisSemiBold] text-[10px] tracking-[0.2em] text-white mix-blend-difference uppercase select-none font-semibold pl-[0.2em]" />
+      </div>
     </main>
   );
 }

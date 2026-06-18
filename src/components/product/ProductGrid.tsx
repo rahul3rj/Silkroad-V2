@@ -9,7 +9,12 @@ import Link from "next/link";
 interface ProductGridProps {
   products: ProductData[];
   filters?: FilterState;
+  /** Navigate to a separate "all" page (old behaviour) */
   showMoreHref?: string;
+  /** Cap visible products and show an inline Show More button */
+  visibleCount?: number;
+  /** Called when the inline Show More button is clicked */
+  onShowMore?: () => void;
 }
 
 function applyFilters(
@@ -74,11 +79,17 @@ export function ProductGrid({
   products,
   filters,
   showMoreHref,
+  visibleCount,
+  onShowMore,
 }: ProductGridProps) {
   const filtered = useMemo(
     () => applyFilters(products, filters),
     [products, filters]
   );
+
+  // When visibleCount is set, slice the results for progressive loading
+  const visible = visibleCount !== undefined ? filtered.slice(0, visibleCount) : filtered;
+  const hasMore = visibleCount !== undefined && visibleCount < filtered.length;
 
   if (filtered.length === 0) {
     return (
@@ -97,12 +108,34 @@ export function ProductGrid({
     <div className="w-full">
       {/* 4-column grid — matches original page.tsx layout */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-16">
-        {filtered.map((product) => (
+        {visible.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
-      {/* Show More pill */}
+      {/* Inline Show More button (progressive loading) */}
+      {hasMore && onShowMore && (
+        <div className="w-full flex justify-center mt-20">
+          <button
+            onClick={onShowMore}
+            className="premium-pill-btn group/btn relative overflow-hidden select-none text-center"
+          >
+            <div className="absolute inset-0 bg-black origin-bottom scale-y-0 group-hover/btn:scale-y-100 transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
+            <div className="relative z-10 pointer-events-none mix-blend-difference text-white flex justify-center items-center overflow-hidden h-[22px]">
+              <div className="relative overflow-hidden h-full flex flex-col justify-start">
+                <span className="block transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:-translate-y-full">
+                  Show More
+                </span>
+                <span className="absolute left-0 top-0 block transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] translate-y-full group-hover/btn:translate-y-0">
+                  Show More
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Navigate-to-all link (legacy showMoreHref) */}
       {showMoreHref && (
         <div className="w-full flex justify-center mt-20">
           <Link

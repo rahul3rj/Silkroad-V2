@@ -91,6 +91,13 @@ const NEXT_STATUSES: Record<string, string[]> = {
 
 type SortOption = "newest" | "oldest" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
+// ── Skeleton placeholder ──────────────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+  return (
+    <div className={`bg-black/[0.04] animate-pulse rounded-sm ${className ?? ""}`} />
+  );
+}
+
 // ── Status dropdown ───────────────────────────────────────────────────────────
 function StatusDropdown({
   orderId,
@@ -323,10 +330,14 @@ export default function AdminOrdersPage() {
   ];
 
   return (
-    <section className="min-h-screen bg-white pt-12 pb-24">
+    <section className="min-h-screen bg-white pt-6.5 pb-24">
       {/* Breadcrumb */}
       <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
         <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878]">
+          Admin
+        </span>
+        <span className="font-[metropolis] text-[10px] text-[#bbb]">/</span>
+        <span className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-black">
           Orders
         </span>
       </div>
@@ -402,13 +413,35 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {loading && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center font-[metropolis] text-[11px] tracking-wider text-[#bbb] uppercase">
-                    Loading orders…
-                  </td>
-                </tr>
-              )}
+              {loading &&
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="border-b border-black/5 last:border-b-0">
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-2.5 w-12 mt-1.5" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-2.5 w-36 mt-1.5" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-3 w-16" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-3 w-12" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-3.5 w-14" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-20" />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Skeleton className="h-3 w-3 ml-auto" />
+                    </td>
+                  </tr>
+                ))
+              }
               {!loading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center font-[metropolis] text-[11px] tracking-wider text-[#bbb] uppercase">

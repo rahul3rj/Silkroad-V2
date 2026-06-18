@@ -40,7 +40,7 @@ export function Footer() {
     { name: "New Arrivals", href: "/new-in" },
     { name: "Men", href: "/men" },
     { name: "Women", href: "/women" },
-    { name: "Accessories", href: "/bags" },
+    { name: "Accessories", href: "/accessories" },
   ];
 
   const companyLinks = [

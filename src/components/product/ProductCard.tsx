@@ -16,7 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* ── Image ── */}
       <Link
         href={`/product/${product.slug}`}
-        className="block w-full min-w-0 h-[70vh] overflow-hidden relative bg-[#f7f6f5]"
+        className="block w-full min-w-0 h-[35vh] md:h-[70vh] overflow-hidden relative bg-[#f7f6f5]"
       >
         <img
           src={product.imageSrc}

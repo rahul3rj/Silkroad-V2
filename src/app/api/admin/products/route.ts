@@ -26,6 +26,8 @@ export async function GET() {
   const brandId = isSuperAdmin ? null : await resolveBrandId(user);
 
   const products = await prisma.product.findMany({
+    // Include both active AND hidden products so admins can manage visibility.
+    // (Public shop routes still filter by isActive: true separately.)
     where: isSuperAdmin ? undefined : { brandId: brandId! },
     orderBy: { createdAt: "desc" },
     include: {
@@ -46,6 +48,7 @@ export async function GET() {
     imageSrc:     p.imageSrc,
     isNew:        p.isNew,
     isSale:       p.isSale,
+    isActive:     p.isActive,
     variants:     p.variants,
     totalStock:   p.variants.reduce((sum, v) => sum + v.stock, 0),
     brandName:    p.brand.name,

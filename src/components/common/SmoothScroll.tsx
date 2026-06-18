@@ -37,10 +37,8 @@ export default function SmoothScroll() {
     }
     requestAnimationFrame(raf);
 
-    const handleScroll = () => {
-      window.dispatchEvent(new Event("scroll"));
-    };
-    lenis.on("scroll", handleScroll);
+
+
 
     return () => {
       lenis.destroy();

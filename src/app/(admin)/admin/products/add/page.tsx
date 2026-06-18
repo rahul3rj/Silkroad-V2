@@ -11,7 +11,7 @@ import {
 const CATEGORIES = [
   { value: "women", label: "Women" },
   { value: "men",   label: "Men" },
-  { value: "bags",  label: "Bags" },
+  { value: "bags",  label: "Accessories" },
 ];
 
 const ALL_SIZES: Record<string, string[]> = {
@@ -74,7 +74,7 @@ export default function AddProductPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [colorPresetOpen, setColorPresetOpen] = useState(false);
   // Track upload state per slot (0=primary, 1=gallery2, 2=gallery3)
   const [uploading, setUploading] = useState<[boolean, boolean, boolean]>([false, false, false]);
@@ -284,7 +284,7 @@ export default function AddProductPage() {
   }
 
   return (
-    <section className="min-h-screen bg-white pt-12 pb-24">
+    <section className="min-h-screen bg-white pt-6.5 pb-24">
 
       {/* ── Breadcrumb ── */}
       <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
@@ -306,12 +306,22 @@ export default function AddProductPage() {
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
-            className="font-[metropolis] text-[9px] tracking-[0.18em] uppercase text-[#787878] hover:text-black transition-colors duration-200 flex items-center gap-2"
+            className="font-[metropolisSemiBold] text-[9px] tracking-[0.22em] uppercase text-white bg-black px-8 py-3 hover:bg-black/80 transition-colors duration-300 flex items-center gap-2.5"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
+            {showPreview ? (
+              /* eye-off (closed eye) icon */
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              /* eye (open eye) icon */
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+            )}
             {showPreview ? "Hide Preview" : "Preview"}
           </button>
         </div>

@@ -452,7 +452,7 @@ export default function ProductDetailPage() {
         {/* ── RIGHT: Product info (sticky) ── */}
         <div className="sticky top-16 bg-white px-10 py-12 lg:px-14 lg:py-14">
           <p className="font-[metropolis] text-[10px] tracking-[0.25em] uppercase text-[#aaa] mb-3">
-            {product.category}
+            {{ bags: "Accessories" }[product.category] ?? product.category}
           </p>
 
           <h1 className="font-[metropolisSemiBold] text-2xl md:text-3xl tracking-[0.04em] uppercase text-black leading-tight mb-3">

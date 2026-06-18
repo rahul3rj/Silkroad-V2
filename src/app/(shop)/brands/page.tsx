@@ -11,7 +11,7 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 
@@ -85,7 +85,7 @@ export default function BrandsPage() {
       />
 
       {/* ── Products Grid ── */}
-      <div className="w-full px-10 py-14">
+      <div className="w-full px-4 md:px-10 py-8 md:py-14">
         <ProductGrid products={products} filters={gridFilters} />
       </div>
     </section>

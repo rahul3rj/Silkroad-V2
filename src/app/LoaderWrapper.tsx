@@ -13,21 +13,31 @@ export default function LoaderWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  const [isLoading, setIsLoading] = useState(isHome);
-  const [showContent, setShowContent] = useState(!isHome);
-  
+  // Always start with a stable SSR-safe state so server and client initial
+  // renders match. We adjust to the real state in the effect below.
+  const [isLoading, setIsLoading] = useState(false);
+  const [showContent, setShowContent] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
   const isLoaderDone = !isLoading;
 
+  // Runs only on the client after mount — safe to read pathname / window here.
   useEffect(() => {
-    if (typeof window !== "undefined" && isHome) {
+    setMounted(true);
+    if (isHome) {
+      // Show the intro loader for the home page
+      setIsLoading(true);
+      setShowContent(false);
       if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
       }
       window.scrollTo(0, 0);
     }
-  }, [isHome]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     if (!isLoading && isHome) {
       // Delay visibility of actual content interactive classes just a tad for smooth transition
       const timer = setTimeout(() => {
@@ -38,7 +48,7 @@ export default function LoaderWrapper({ children }: { children: React.ReactNode 
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowContent(true);
     }
-  }, [isLoading, isHome]);
+  }, [isLoading, isHome, mounted]);
 
   return (
     <LoaderContext.Provider value={{ isLoaderDone }}>

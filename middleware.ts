@@ -42,9 +42,7 @@ export default auth((req: NextAuthRequest) => {
   // ── Super-admin-only routes (checked before generic admin routes) ─────────
   if (SUPER_ADMIN_ROUTES.some((r) => path.startsWith(r))) {
     if (!isLoggedIn) {
-      const loginUrl = new URL("/login", nextUrl);
-      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
+      return NextResponse.redirect(new URL("/", nextUrl));
     }
     if (role !== "SUPER_ADMIN") {
       // Brand admins are sent back to their dashboard
@@ -55,9 +53,7 @@ export default auth((req: NextAuthRequest) => {
   // ── Admin routes — must be ADMIN or SUPER_ADMIN ───────────────────────────
   if (ADMIN_ROUTES.some((r) => path.startsWith(r))) {
     if (!isLoggedIn) {
-      const loginUrl = new URL("/login", nextUrl);
-      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
+      return NextResponse.redirect(new URL("/", nextUrl));
     }
     if (!isAdmin) {
       // Authenticated but not an admin → send to home

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ProductFilters, FilterState } from "@/components/product/ProductFilters";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { PageLoader } from "@/components/product/PageLoader";
@@ -11,13 +11,22 @@ const DEFAULT_FILTERS: FilterState = {
   subcategories: [],
   colors: [],
   sizes: [],
-  priceRange: [0, 2000],
+  priceRange: [0, 50000],
   sortBy: "newest",
 };
 
-export default function BagsPage() {
+const INITIAL_COUNT = 8;
+const LOAD_MORE_COUNT = 16;
+
+export default function AccessoriesPage() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const { products, loading } = useProducts("category=bags");
+
+  const handleFiltersChange = useCallback((f: FilterState) => {
+    setFilters(f);
+    setVisibleCount(INITIAL_COUNT);
+  }, []);
 
   if (loading) return <PageLoader />;
 
@@ -26,24 +35,25 @@ export default function BagsPage() {
       {/* Page Header */}
       <div className="w-full flex flex-col items-center py-12 bg-white">
         <h1 className="font-[metropolis] text-black text-2xl md:text-3xl tracking-[0.04em]">
-          Bags &amp; Accessories
+          Accessories
         </h1>
       </div>
 
       {/* Sticky Filter Bar + Drawer */}
       <ProductFilters
         subcategories={bagsSubcategories}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         resultCount={products.length}
-        searchLabel="Bags"
+        searchLabel="Accessories"
       />
 
       {/* Flat 4-col Product Grid */}
-      <div className="w-full px-10 py-14">
+      <div className="w-full px-4 md:px-10 py-8 md:py-14">
         <ProductGrid
           products={products}
           filters={filters}
-          showMoreHref="/bags/all"
+          visibleCount={visibleCount}
+          onShowMore={() => setVisibleCount((c) => c + LOAD_MORE_COUNT)}
         />
       </div>
     </section>

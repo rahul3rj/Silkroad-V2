@@ -175,7 +175,7 @@ function SignupForm() {
   return (
     <main className="min-h-screen bg-white pt-20 pb-24">
       {/* Breadcrumb */}
-      <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
+      <div className="border-b border-black/8 px-4 md:px-10 py-3 flex items-center gap-2">
         <Link href="/" className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878] hover:text-black transition-colors duration-200">
           Silkroad
         </Link>
@@ -480,7 +480,7 @@ function SignupForm() {
           </div>
 
           {/* Submit */}
-          <div className="mt-8 flex flex-col md:flex-row items-start md:items-center gap-4 justify-end">
+          <div className="mt-8 flex flex-col md:flex-row items-start md:items-center gap-4 md:justify-end">
             <div className="text-right">
               <p className="font-[metropolis] text-[10px] text-[#787878] tracking-wider leading-relaxed">
                 {verifyState !== "verified"
@@ -493,7 +493,7 @@ function SignupForm() {
               type="submit"
               disabled={loading || verifyState !== "verified"}
               title={verifyState !== "verified" ? "Please verify your email first" : undefined}
-              className={`px-12 py-4 font-[metropolisSemiBold] text-[10px] tracking-[0.25em] uppercase rounded-full transition-all duration-300 whitespace-nowrap flex items-center gap-2 ${
+              className={`w-full md:w-auto px-12 py-4 font-[metropolisSemiBold] text-[10px] tracking-[0.25em] uppercase rounded-full transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2 ${
                 verifyState !== "verified"
                   ? "bg-black/20 text-white cursor-not-allowed"
                   : loading

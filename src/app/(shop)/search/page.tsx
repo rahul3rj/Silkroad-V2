@@ -27,12 +27,16 @@ function applyFilters(
   let result = [...products];
 
   if (filters.subcategories.length > 0) {
+    // "Accessories" is the display label for the "bags" category slug
+    const UI_CATEGORY_MAP: Record<string, string> = { accessories: "bags" };
     result = result.filter((p) =>
-      filters.subcategories.some(
-        (sub) =>
-          p.subcategory.toLowerCase() === sub.toLowerCase() ||
-          p.category.toLowerCase() === sub.toLowerCase(),
-      ),
+      filters.subcategories.some((sub) => {
+        const normalised = UI_CATEGORY_MAP[sub.toLowerCase()] ?? sub.toLowerCase();
+        return (
+          p.subcategory.toLowerCase() === normalised ||
+          p.category.toLowerCase() === normalised
+        );
+      }),
     );
   }
 
@@ -74,7 +78,7 @@ const SEARCH_SUBCATEGORIES = [
   "View All",
   "Women",
   "Men",
-  "Bags",
+  "Accessories",
   "Dresses",
   "Suits",
   "Blazers",
@@ -204,17 +208,24 @@ function SearchInput({
   }, [suggestions]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open || suggestions.length === 0) return;
     if (e.key === "ArrowDown") {
+      if (!open || suggestions.length === 0) return;
       e.preventDefault();
       setActiveIdx((i) => Math.min(i + 1, suggestions.length - 1));
     } else if (e.key === "ArrowUp") {
+      if (!open || suggestions.length === 0) return;
       e.preventDefault();
       setActiveIdx((i) => Math.max(i - 1, -1));
-    } else if (e.key === "Enter" && activeIdx >= 0) {
+    } else if (e.key === "Enter") {
       e.preventDefault();
-      onPickSuggestion(suggestions[activeIdx].text);
       setOpen(false);
+      if (activeIdx >= 0 && suggestions[activeIdx]) {
+        // A suggestion is highlighted — pick it
+        onPickSuggestion(suggestions[activeIdx].text);
+      }
+      // Whether or not a suggestion was picked, close the dropdown.
+      // The debounced search is already running from the onChange handler,
+      // so no extra trigger is needed for the plain-text case.
     } else if (e.key === "Escape") {
       setOpen(false);
     }
@@ -305,7 +316,7 @@ function SearchInput({
 
 function SectionHeader({ label, index }: { label: string; index: string }) {
   return (
-    <div className="w-full flex items-center justify-between mb-6 px-10">
+    <div className="w-full flex items-center justify-between mb-6 px-4 md:px-10">
       <span className="font-[metropolis] text-black text-[13px] tracking-wide">{label}</span>
       <span className="font-[metropolisSemiBold] text-[10px] tracking-[0.22em] text-[#787878]">[ {index} ]</span>
     </div>
@@ -422,10 +433,10 @@ function SearchInner() {
     subcategories: [],
     colors: [],
     sizes: [],
-    priceRange: [0, 2000],
+    priceRange: [0, 50000],
     sortBy: "newest",
   });
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(16);
   const [phase, setPhase] = useState<SearchPhase>("idle");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
@@ -440,7 +451,7 @@ function SearchInner() {
       setPhase("exiting");
       debounceRef.current = setTimeout(() => {
         setCommittedQuery(nextQuery);
-        setVisibleCount(8);
+        setVisibleCount(16);
         setPhase("loading");
         const params = new URLSearchParams(window.location.search);
         if (nextQuery.trim()) params.set("q", nextQuery.trim());
@@ -487,7 +498,7 @@ function SearchInner() {
   };
   const handleFiltersChange = useCallback((f: FilterState) => {
     setFilters(f);
-    setVisibleCount(8);
+    setVisibleCount(16);
   }, []);
 
   const hasQuery = committedQuery.trim().length > 0;
@@ -514,7 +525,7 @@ function SearchInner() {
 
   return (
     <section className="page-content-enter">
-      <div className={`pt-24 ${hasQuery ? "pb-6" : "pb-10"} flex justify-center px-10`}>
+      <div className={`pt-24 ${hasQuery ? "pb-6" : "pb-10"} flex justify-center px-4 md:px-10`}>
         <SearchInput
           value={query}
           onChange={setQuery}
@@ -540,7 +551,7 @@ function SearchInner() {
                 resultCount={results.length}
                 searchLabel={committedQuery.trim()}
               />
-              <div className="px-10 pt-8 pb-4 flex-1">
+              <div className="px-4 md:px-10 pt-8 pb-4 flex-1">
                 {results.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-32 text-center">
                     <p className="font-[metropolis] text-[#787878] text-[13px] tracking-widest uppercase mb-2">
@@ -558,13 +569,13 @@ function SearchInner() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-4 gap-x-5 gap-y-12">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-5 gap-y-8 md:gap-y-12">
                       {visibleResults.map((product) => (
                         <ProductCard key={product.id} product={product} />
                       ))}
                     </div>
                     {visibleCount < results.length && (
-                      <ShowMoreButton onClick={() => setVisibleCount((c) => c + 8)} />
+                      <ShowMoreButton onClick={() => setVisibleCount((c) => c + 16)} />
                     )}
                   </>
                 )}
@@ -574,7 +585,7 @@ function SearchInner() {
             <>
               <section className="mb-12">
                 <SectionHeader label="Iconic Pieces for Her" index="01" />
-                <div className="px-10 grid grid-cols-4 gap-x-5 gap-y-10">
+                <div className="px-4 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-5 gap-y-8 md:gap-y-10">
                   {womenProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -583,7 +594,7 @@ function SearchInner() {
 
               <section className="mb-12">
                 <SectionHeader label="Iconic Pieces for Him" index="02" />
-                <div className="px-10 grid grid-cols-4 gap-x-5 gap-y-10">
+                <div className="px-4 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-5 gap-y-8 md:gap-y-10">
                   {menProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

@@ -22,7 +22,7 @@ export default function CartPage() {
     <section className="w-full min-h-screen bg-white pt-16 pb-24">
 
       {/* ── Breadcrumb ── */}
-      <div className="border-b border-black/8 px-10 py-3 flex items-center gap-2">
+      <div className="border-b border-black/8 px-4 md:px-10 py-3 flex items-center gap-2">
         <Link
           href="/"
           className="font-[metropolis] text-[10px] tracking-[0.15em] uppercase text-[#787878] hover:text-black transition-colors duration-200"
@@ -39,9 +39,9 @@ export default function CartPage() {
       <div className="max-w-5xl mx-auto px-6 md:px-10 pt-10">
 
         {/* ── Page title row ── */}
-        <div className="flex items-baseline justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="font-[metropolis] text-[28px] tracking-[-0.01em] text-black">
+            <h1 className="font-[metropolis] text-[24px] md:text-[28px] tracking-[-0.01em] text-black">
               Your Bag
             </h1>
             {itemCount > 0 && (
@@ -72,7 +72,7 @@ export default function CartPage() {
         {items.length > 0 && (
           <div className="border-b border-black/5 pb-5 mb-8">
             {subtotal < 150 ? (
-              <div className="flex flex-col gap-2 max-w-sm">
+              <div className="flex flex-col gap-2 w-full max-w-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-[9px] font-[metropolis] text-[#787878] tracking-[0.12em] uppercase">
                     Free shipping
